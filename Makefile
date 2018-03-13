@@ -10,6 +10,15 @@ RELEASE_PROJECT := $(PROJECT_NAME)$(BUILD_ID)
 DEV_PROJECT := $(RELEASE_PROJECT)dev
 
 
+INSPECT := $$(docker-compose -p $$1 -f $$2 ps -q $$3 | xargs -I ARGS docker inspect -f "{{ .State.ExitCode  }}" ARGS)
+
+CHECK := @bash -c '\
+	if [[ $(INSPECT) -ne 0 ]]; \
+ 	then exit $(INSPECT); fi' VALUE
+
+## VALUE above is the text following call to the $CHECK variable or ARG1. Can easily be VALUE1 VALUE2 VALUE2 if applicable 
+
+
 .PHONY: test test2 build release clean
 
 
@@ -17,10 +26,11 @@ test:
 	$(INFO) "Building images..."
 	@docker-compose -p $(DEV_PROJECT)  -f $(DEV_COMPOSE_FILE) build
 	$(INFO) "Wait for Test database service to be ready before proceeding..."
-	@docker-compose -p $(DEV_PROJECT)  -f $(DEV_COMPOSE_FILE) up agent
+	@ docker-compose -p $(DEV_PROJECT)  -f $(DEV_COMPOSE_FILE) run --rm  agent
 	$(INFO) "Run tests..."
 	@docker-compose -p $(DEV_PROJECT)  -f $(DEV_COMPOSE_FILE) up test
 	@ docker cp $$(docker-compose -p $(DEV_PROJECT) -f $(DEV_COMPOSE_FILE) ps -q test):/reports/. reports
+	${CHECK} $(DEV_PROJECT) $(DEV_COMPOSE_FILE) test
 	$(INFO) "Testing complete!!"
 
 2test2:
@@ -31,6 +41,7 @@ test:
 build:
 	$(INFO) "Building Application Artifacts using builder service..."
 	@docker-compose -p $(DEV_PROJECT) -f $(DEV_COMPOSE_FILE) up builder
+	${CHECK} $(DEV_PROJECT)  $(DEV_COMPOSE_FILE) builder
 	${INFO} "Coping artifacts to target folder..."
 	@docker cp $$(docker-compose -p $(DEV_PROJECT) -f $(DEV_COMPOSE_FILE) ps -q builder):/wheelhouse/.  target
 	$(INFO) "Build complete!!"
@@ -39,7 +50,7 @@ release:
 	${INFO} "Building images...using $(RELEASE_COMPOSE_FILE)"
 	@docker-compose -p $(RELEASE_PROJECT)  -f $(RELEASE_COMPOSE_FILE) build
 	${INFO} "Wait for Release Database service to be ready before proceeding..."
-	@docker-compose -p $(RELEASE_PROJECT)  -f $(RELEASE_COMPOSE_FILE) up agent
+	@docker-compose -p $(RELEASE_PROJECT)  -f $(RELEASE_COMPOSE_FILE) run --rm agent
 	${INFO} "Collecting static files.."
 	@docker-compose -p $(RELEASE_PROJECT)  -f $(RELEASE_COMPOSE_FILE) run --rm app manage.py collectstatic --noinput
 	${INFO} "Running database migrations..."
@@ -47,6 +58,7 @@ release:
 	${INFO} "Running acceptance test..."
 	@docker-compose -p $(RELEASE_PROJECT)  -f $(RELEASE_COMPOSE_FILE) up test
 	@ docker cp $$(docker-compose -p $(RELEASE_PROJECT) -f $(RELEASE_COMPOSE_FILE) ps -q test):/reports/. reports
+	${CHECK} $(RELEASE_PROJECT) $(RELEASE_COMPOSE_FILE) test
 	${INFO} "Acceptance tesing complete"
 
 clean:
