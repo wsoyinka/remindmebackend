@@ -1,0 +1,9 @@
+FROM nginx
+
+LABEL maintainer="wale soyinka <wsoyinka@gmail.com>"
+
+COPY todobackend.conf /etc/nginx/conf.d/todobackend.conf
+
+## Love to be able to access 
+
+##    - /tmp/nlogs:/var/log/nginx
