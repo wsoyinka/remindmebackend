@@ -16,3 +16,5 @@ src/*egg-info
 
 target
 reports
+
+.DS_Store
