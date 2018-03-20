@@ -91,8 +91,10 @@ logout:
 
 publish:
 	${INFO} "Publish release image $(IMAGE_ID) to $(DOCKER_REGISTRY)/$(ORG_NAME)/$(REPO_NAME)..."
-### $(shell echo $(REPO_EXPR))  ---> will return a list of tags added using make tag and make buildtag ###
-	@ $(foreach tag, $(shell echo $(REPO_EXPR)), docker push $(tag);)
+	echo "hello world $(REPO_EXPR)"
+	@ $(foreach tag,$(shell echo $(REPO_EXPR)), docker push $(tag);)
+#	$(shell echo $(REPO_EXPR))  ####---> will return a list of tags added using make tag and make buildtag ###
+#$(foreach tag,$(shell echo $(REPO_EXPR)), docker push $(tag);)
 	${INFO} "Publish Done !!"
 
 APP_CONTAINER_ID := $$(docker-compose -p $(RELEASE_PROJECT) -f $(RELEASE_COMPOSE_FILE) ps -q $(APP_SERVICE_NAME) )
@@ -108,7 +110,7 @@ else
 endif
 
 
-REPO_EXPR := $$(docker inspect -f '{{ range .RepoTags }} {{.}} {{end}}' $(IMAGE_ID) | grep -oh "$(REPO_FILTER" | xargs   )
+REPO_EXPR := $$(docker inspect -f '{{ range .RepoTags }} {{.}} {{end}}' $(IMAGE_ID) | grep -oh "$(REPO_FILTER)" | xargs   )
 
 tag:
 	${INFO} "Tagging release image with tags $(TAG_ARGS)"
