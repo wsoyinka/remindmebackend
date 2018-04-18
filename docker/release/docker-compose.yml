@@ -67,7 +67,7 @@ db:
 
 
 agent:
-  image: wsoyinka/ansible
+  image: wsoyinka/remindme-docker-ansible
   links:
     - db
   environment:
