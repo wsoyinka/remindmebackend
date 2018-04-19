@@ -118,7 +118,7 @@ REPO_EXPR := $$(docker inspect -f '{{ range .RepoTags }} {{.}} {{end}}' $(IMAGE_
 
 tag:
 	${INFO} "Tagging release image with tags $(TAG_ARGS)"
-	$(foreach tag,$(TAG_ARGS), docker tag $(IMAGE_ID) $(DOCKER_REGISTRY)/$(ORG_NAME)/$(REPO_NAME):$(tag);)
+	$(foreach tag,$(TAG_ARGS), docker tag -f $(IMAGE_ID) $(DOCKER_REGISTRY)/$(ORG_NAME)/$(REPO_NAME):$(tag);)
 	${INFO} "Tagging Complete!!"
 buildtag:
 	${INFO} "Tagging final release image with suffix $(BUILD_TAG) and build tags $(BUILDTAG_ARGS)....."
