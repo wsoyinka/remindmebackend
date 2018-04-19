@@ -30,13 +30,14 @@ DOCKER_REGISTRY_AUTH ?=
 
 test:
 	$(INFO) "Building images..."
-	@docker-compose -p $(DEV_PROJECT)  -f $(DEV_COMPOSE_FILE) build
+	@docker-compose -p $(DEV_PROJECT)  -f $(DEV_COMPOSE_FILE) build test
 	$(INFO) "Wait for Test database service to be ready before proceeding..."
 	@ docker-compose -p $(DEV_PROJECT)  -f $(DEV_COMPOSE_FILE) run --rm  agent
 	$(INFO) "Run tests..."
 	@docker-compose -p $(DEV_PROJECT)  -f $(DEV_COMPOSE_FILE) up test
 	@ docker cp $$(docker-compose -p $(DEV_PROJECT) -f $(DEV_COMPOSE_FILE) ps -q test):/reports/. reports
 	${CHECK} $(DEV_PROJECT) $(DEV_COMPOSE_FILE) test
+	@docker-compose -p $(DEV_PROJECT)  -f $(DEV_COMPOSE_FILE) rm -s -f db
 	$(INFO) "Testing complete!!"
 
 2test2:
