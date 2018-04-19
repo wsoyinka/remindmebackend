@@ -30,10 +30,10 @@ DOCKER_REGISTRY_AUTH ?=
 
 test:
 	$(INFO) "Pulling latest images..."
-	@docker-compose -p $(DEV_PROJECT)  -f $(DEV_COMPOSE_FILE) pull
+#	@docker-compose -p $(DEV_PROJECT)  -f $(DEV_COMPOSE_FILE) pull
 	$(INFO) "Building images..."
-	@docker-compose -p $(DEV_PROJECT)  -f $(DEV_COMPOSE_FILE) build --pull test
-	@docker-compose -p $(DEV_PROJECT)  -f $(DEV_COMPOSE_FILE) build cache
+	@docker-compose -p $(DEV_PROJECT)  -f $(DEV_COMPOSE_FILE) build test
+#	@docker-compose -p $(DEV_PROJECT)  -f $(DEV_COMPOSE_FILE) build cache
 	$(INFO) "Wait for Test database service to be ready before proceeding..."
 	@ docker-compose -p $(DEV_PROJECT)  -f $(DEV_COMPOSE_FILE) run --rm  agent
 	$(INFO) "Run tests..."
